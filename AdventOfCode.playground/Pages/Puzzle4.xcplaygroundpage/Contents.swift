@@ -2,6 +2,8 @@
 
 import Foundation
 
-var greeting = "Hello, playground"
+measureExecutionTime {
+    let content = contentOfResource(name: "input", type: "txt")
+}
 
 //: [Puzzle5](@next)
