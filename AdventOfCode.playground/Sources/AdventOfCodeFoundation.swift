@@ -17,3 +17,9 @@ public func contentOfResource(name: String, type: String) -> String {
     let content = String(data:contentData, encoding:String.Encoding.utf8)
     return content!
 }
+
+public extension RandomAccessCollection {
+    subscript(at index: Index) -> Element? {
+        self.indices.contains(index) ? self[index] : nil
+    }
+}

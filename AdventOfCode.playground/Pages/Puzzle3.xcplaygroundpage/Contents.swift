@@ -24,6 +24,54 @@ struct Machine {
         self.rowLength = self.machineData.first!.count
     }
 
+    func process() -> Int {
+        var partNumbers: Set<Int> = Set()
+        var otherPartNumbers: [Int] = []
+
+        for (row, line) in self.input.split(separator: "\n").enumerated() {
+            let numbers = self.findNumbers(in: String(line))
+            numbers.forEach { (start, length, value) in
+                let valid = isAdjacentToSymbol(row: row, start: start, length: length)
+                if valid {
+                    // print(value)
+                    partNumbers.insert(value)
+                    otherPartNumbers.append(value)
+                }
+            }
+        }
+
+        print(partNumbers.sorted())
+        return otherPartNumbers.reduce(0) { $0 + $1 }
+    }
+
+    func isAdjacentToSymbol(row: Int, start: Int, length: Int) -> Bool {
+        for x in max(start - 1, 0)...min(start + length, self.rowLength - 1) {
+            for y in max(row - 1, 0)...min(row + 1, self.machineData.count - 1) {
+                let char = machineData[y][x]
+                if(!char.isNumber && char != ".") {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    func findNumbers(in string: String) -> [(start: Int, length: Int, value: Int)] {
+        let regex = try! NSRegularExpression(pattern: #"\d+"#, options: [])
+        let matches = regex.matches(in: string, options: [], range: NSRange(location: 0, length: string.utf16.count))
+
+        let numbers = matches.compactMap { match -> (start: Int, length: Int, value: Int)? in
+            if let range = Range(match.range, in: string), let number = Int(string[range]) {
+                return (match.range.lowerBound, match.range.length, number)
+            }
+            return nil
+        }
+
+        return numbers
+    }
+}
+
+extension Machine {
     func processPart2() -> Int {
         let numbers = self.machineData.map({ self.findNumbers(in: String($0) )})
 
@@ -45,7 +93,7 @@ struct Machine {
                             // print("\(value) is catched 1 in row0")
                             return true
 
-                        } 
+                        }
                         else if (end >= starPosition - 1 && end <= starPosition + 1)
                         {
                            //  print("\(value) is catched 2 in row0")
@@ -76,7 +124,7 @@ struct Machine {
                         if (starPosition >= start - 1 && starPosition <= start + 1) {
                            // print("\(value) is catched 1 in row2")
                             return true
-                        } 
+                        }
                         else if (end >= starPosition - 1 && end <= starPosition + 1)
                         {
                             // print("\(value) is catched 2 in row2")
@@ -100,25 +148,6 @@ struct Machine {
         return gears.reduce(0) { $0 + $1 }
     }
 
-    func process() -> Int {
-        var partNumbers: Set<Int> = Set()
-        var otherPartNumbers: [Int] = []
-
-        for (row, line) in self.input.split(separator: "\n").enumerated() {
-            let numbers = self.findNumbers(in: String(line))
-            numbers.forEach { (start, length, value) in
-                let valid = isAdjacentToSymbol(row: row, start: start, length: length)
-                if valid {
-                    // print(value)
-                    partNumbers.insert(value)
-                    otherPartNumbers.append(value)
-                }
-            }
-        }
-
-        print(partNumbers.sorted())
-        return otherPartNumbers.reduce(0) { $0 + $1 }
-    }
 
     func adjacentGearRations(row: Int, column: Int) -> [Int] {
         var gearRations: [Int] = []
@@ -131,36 +160,6 @@ struct Machine {
             }
         }
         return gearRations
-    }
-
-    func isAdjacentToSymbol(row: Int, start: Int, length: Int) -> Bool {
-        for x in max(start - 1, 0)...min(start + length, self.rowLength - 1) {
-            for y in max(row - 1, 0)...min(row + 1, self.machineData.count - 1) {
-                let char = machineData[y][x]
-//                if(!char.isNumber && char != "." && !char.isSymbol) {
-//                    print(char)
-//                }
-                if(!char.isNumber && char != ".") {
-                    // print("\(x)\\\(y)\\\(char)")
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    func findNumbers(in string: String) -> [(start: Int, length: Int, value: Int)] {
-        let regex = try! NSRegularExpression(pattern: #"\d+"#, options: [])
-        let matches = regex.matches(in: string, options: [], range: NSRange(location: 0, length: string.utf16.count))
-
-        let numbers = matches.compactMap { match -> (start: Int, length: Int, value: Int)? in
-            if let range = Range(match.range, in: string), let number = Int(string[range]) {
-                return (match.range.lowerBound, match.range.length, number)
-            }
-            return nil
-        }
-
-        return numbers
     }
 
     func findStars(in string: String) -> [Int] {
